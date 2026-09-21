@@ -2,7 +2,7 @@
   "name": "勤務時間トラッカー PWA",
   "short_name": "勤怠PWA",
   "description": "PWAとしての勤務時間記録・管理アプリ",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
