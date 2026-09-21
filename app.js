@@ -221,7 +221,25 @@ function drawChart(records) {
                 borderWidth: 1
             }]
         },
-        options: { responsive: true, scales: { y: { beginAtZero: true, title: { display: true, text: '稼働時間 (分)' } } } }
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 15,
+                        callback: (value) => value % 60 === 0 ? `${value}分` : ''
+                    },
+                    grid: {
+                        color: (context) => context.tick.value % 60 === 0
+                            ? 'rgba(0, 0, 0, 0.25)'
+                            : 'rgba(0, 0, 0, 0.1)',
+                        lineWidth: (context) => context.tick.value % 60 === 0 ? 1.5 : 1
+                    },
+                    title: { display: true, text: '稼働時間 (分)' }
+                }
+            }
+        }
     });
 }
 
