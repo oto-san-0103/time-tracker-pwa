@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA 勤務時間トラッカー</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>⏰ 勤務時間記録</h1>
+    </header>
+    <main>
+        <nav class="tab-menu">
+            <button class="tab-button active" data-tab="record-tab">
+                新規記録
+            </button>
+            <button class="tab-button" data-tab="report-tab">
+                レポート分析
+            </button>
+            <button class="tab-button" data-tab="settings-tab">
+                設定
+            </button>
+        </nav>
+
+        <section id="record-tab" class="tab-panel active">
+            <h2>新規記録</h2>
+
+            <!-- <div class="date-input-row">
+                <input type="date" id="date" required>
+                <button type="button" id="today-button">今日</button>
+            </div> -->
+
+            <div class="time-input-row">
+                <input type="datetime-local" id="start-datetime" required>
+                <button type="button" class="now-button" data-target="start-datetime">
+                    現在時刻
+                </button>
+            </div>
+
+            <div class="time-input-row">
+                <input type="datetime-local" id="end-datetime">
+                <button type="button" class="now-button" data-target="end-datetime">
+                    現在時刻
+                </button>
+            </div>
+
+            <fieldset class="record-options">
+                <legend>勤務区分</legend>
+
+                <label>
+                    <input type="checkbox" name="record-option" value="振替休日予定">
+                    振替休日予定
+                </label>
+
+                <label>
+                    <input type="checkbox" name="record-option" value="休日出勤">
+                    休日出勤
+                </label>
+
+                <label>
+                    <input type="checkbox" name="record-option" value="遅刻">
+                    遅刻
+                </label>
+
+                <label>
+                    <input type="checkbox" name="record-option" value="早退">
+                    早退
+                </label>
+
+                <label>
+                    <input type="checkbox" name="record-option" value="テレワーク">
+                    テレワーク
+                </label>
+
+                <label>
+                    <input type="checkbox" name="record-option" value="シフト">
+                    シフト
+                </label>
+            </fieldset>
+
+            <input
+                type="number"
+                id="break-minutes"
+                placeholder="休憩時間（分）"
+                min="0"
+                value="60"
+                required
+            >
+
+            <button id="save-button">記録して稼働時間を計算</button>
+            <p id="result-display" class="message"></p>
+        </section>
+
+        <section id="report-tab" class="tab-panel">
+            <h2>レポート・分析</h2>
+
+            <button id="export-csv-button">CSVファイルに書き出す</button>
+
+            <h3>日別稼働時間グラフ</h3>
+            <div class="chart-container">
+                <canvas id="workTimeChart"></canvas>
+                <p id="chart-empty-message">記録されたデータがありません。</p>
+            </div>
+
+            <h3>全記録データ</h3>
+            <table id="records-table">
+                <thead>
+                    <tr>
+                        <th>日付</th>
+                        <th>開始</th>
+                        <th>終了</th>
+                        <th>休憩(分)</th>
+                        <th>勤務区分</th>
+                        <th>稼働時間</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+
+        <section id="settings-tab" class="tab-panel">
+            <h2>設定</h2>
+
+            <label for="default-break-minutes">
+                標準の休憩時間（分）
+            </label>
+            <input
+                type="number"
+                id="default-break-minutes"
+                min="0"
+                value="60"
+            >
+
+            <button type="button" id="save-settings-button">
+                設定を保存
+            </button>
+
+            <hr>
+
+            <h3>年月ごとの記録削除</h3>
+
+            <select id="record-month-select">
+                <option value="">年月を選択してください</option>
+            </select>
+
+            <button type="button" id="delete-month-button">
+                選択した年月の記録を削除
+            </button>
+
+            <p id="settings-message" class="message"></p>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
