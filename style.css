@@ -47,6 +47,8 @@ button {
     text-align: center;
 }
 .chart-container {
+    position: relative;
+    height: clamp(240px, 40vh, 400px);
     padding: 10px 0;
 }
 /* テーブルデザイン */
