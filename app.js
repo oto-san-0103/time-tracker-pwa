@@ -108,8 +108,8 @@ function saveRecord() {
     const breakMinutes =
         parseInt(document.getElementById('break-minutes').value, 10) || 0;
 
-    if (!startDateTimeStr || !endDateTimeStr) {
-        alert('開始日時と終了日時を入力してください。');
+    if (!startDateTimeStr) {
+        alert('開始日時を入力してください。');
         return;
     }
 
