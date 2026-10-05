@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. ページ表示時に既存データを読み込み、グラフとテーブルを更新
     loadAndRenderData();
+    restoreTodayRecordTimes();
 
     // 3. 記録ボタンのイベントリスナー
     document.getElementById('save-button').addEventListener('click', saveRecord);
@@ -50,6 +51,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             button.classList.add('active');
             document.getElementById(targetTabId).classList.add('active');
+
+            if (targetTabId === 'record-tab') {
+                restoreTodayRecordTimes();
+            }
 
             // レポートタブを開いたときにグラフを再描画
             if (targetTabId === 'report-tab') {
@@ -97,6 +102,32 @@ function getRecords() {
  */
 function saveRecords(records) {
     localStorage.setItem('workRecords', JSON.stringify(records));
+}
+
+function restoreTodayRecordTimes() {
+    const today = new Date();
+    const dateStr = [
+        today.getFullYear(),
+        String(today.getMonth() + 1).padStart(2, '0'),
+        String(today.getDate()).padStart(2, '0')
+    ].join('-');
+    const record = getRecords().find(item => item.date === dateStr);
+
+    if (!record) {
+        return;
+    }
+
+    const startDateTime = record.startDateTime ||
+        (record.startTime ? `${record.date}T${record.startTime}` : '');
+    const endDateTime = record.endDateTime ||
+        (record.endTime ? `${record.date}T${record.endTime}` : '');
+
+    if (startDateTime) {
+        document.getElementById('start-datetime').value = startDateTime;
+    }
+    if (endDateTime) {
+        document.getElementById('end-datetime').value = endDateTime;
+    }
 }
 
 // 記録の保存・計算処理（Chrome拡張機能のロジックと同様）
