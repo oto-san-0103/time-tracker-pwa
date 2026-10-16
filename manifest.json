@@ -4,7 +4,7 @@
   "description": "PWAとしての勤務時間記録・管理アプリ",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#afafaf",
   "theme_color": "#007bff",
   "icons": [
     {
