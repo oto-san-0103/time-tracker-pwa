@@ -117,6 +117,13 @@ function restoreTodayRecordTimes() {
         return;
     }
 
+    const selectedOptions = new Set(
+        Array.isArray(record.options) ? record.options : []
+    );
+    document.querySelectorAll('input[name="record-option"]').forEach(checkbox => {
+        checkbox.checked = selectedOptions.has(checkbox.value);
+    });
+
     const startDateTime = record.startDateTime ||
         (record.startTime ? `${record.date}T${record.startTime}` : '');
     const endDateTime = record.endDateTime ||
@@ -172,7 +179,9 @@ function saveRecord() {
         startDateTime: startDateTimeStr,
         endDateTime: endDateTimeStr,
         breakMinutes,
-        options,
+        options: [...document.querySelectorAll(
+            'input[name="record-option"]:checked'
+        )].map(checkbox => checkbox.value),
         workDuration,
         timestamp: Date.now()
     };
@@ -214,7 +223,7 @@ function loadAndRenderData() {
         chart.style.display = 'block';
         emptyMessage.style.display = 'none';
 
-        drawChart(records);
+        drawChart(records.slice(-5));
         renderTable(records);
     } else {
         chart.style.display = 'none';
@@ -389,7 +398,3 @@ document.getElementById('delete-month-button').addEventListener('click', () => {
         `${displayMonth}の記録を削除しました。`;
 });
 
-// 記録の選択肢の初期化
-const options = [...document.querySelectorAll(
-    'input[name="record-option"]:checked'
-)].map(checkbox => checkbox.value);
