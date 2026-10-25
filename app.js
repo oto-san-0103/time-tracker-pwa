@@ -73,11 +73,48 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('break-minutes').value =
         defaultBreakMinutes;
 
+    const legacyRoundingDirection =
+        localStorage.getItem('roundingDirection');
+    document.getElementById('start-rounding-direction').value =
+        localStorage.getItem('startRoundingDirection') ||
+        legacyRoundingDirection ||
+        'up';
+    document.getElementById('end-rounding-direction').value =
+        localStorage.getItem('endRoundingDirection') ||
+        legacyRoundingDirection ||
+        'down';
+    document.getElementById('rounding-minutes').value =
+        localStorage.getItem('roundingMinutes') || '1';
+
     // 設定の保存
     document.getElementById('save-settings-button').addEventListener('click', () => {
         const value = document.getElementById('default-break-minutes').value || '0';
+        const startRoundingDirection =
+            document.getElementById('start-rounding-direction').value;
+        const endRoundingDirection =
+            document.getElementById('end-rounding-direction').value;
+        const roundingMinutes = Number(
+            document.getElementById('rounding-minutes').value
+        );
+
+        if (!Number.isInteger(roundingMinutes) ||
+            roundingMinutes < 1 ||
+            roundingMinutes > 60) {
+            document.getElementById('settings-message').textContent =
+                '丸める単位は1〜60分の整数で指定してください。';
+            return;
+        }
 
         localStorage.setItem('defaultBreakMinutes', value);
+        localStorage.setItem(
+            'startRoundingDirection',
+            startRoundingDirection
+        );
+        localStorage.setItem(
+            'endRoundingDirection',
+            endRoundingDirection
+        );
+        localStorage.setItem('roundingMinutes', String(roundingMinutes));
         document.getElementById('break-minutes').value = value;
         document.getElementById('settings-message').textContent =
             '設定を保存しました。';
@@ -102,6 +139,24 @@ function getRecords() {
  */
 function saveRecords(records) {
     localStorage.setItem('workRecords', JSON.stringify(records));
+}
+
+function roundDateTime(date, interval, direction) {
+    const roundedDate = new Date(date);
+    const minutesSinceMidnight =
+        roundedDate.getHours() * 60 + roundedDate.getMinutes();
+    const roundedMinutes = direction === 'down'
+        ? Math.floor(minutesSinceMidnight / interval) * interval
+        : Math.ceil(minutesSinceMidnight / interval) * interval;
+
+    roundedDate.setHours(0, roundedMinutes, 0, 0);
+    return roundedDate;
+}
+
+function formatLocalDateTime(date) {
+    const pad = value => String(value).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+        `T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 function restoreTodayRecordTimes() {
@@ -159,7 +214,40 @@ function saveRecord() {
         return;
     }
 
-    const workTimeMs = end - start;
+    const legacyRoundingDirection =
+        localStorage.getItem('roundingDirection') || 'up';
+    const startRoundingDirection =
+        localStorage.getItem('startRoundingDirection') ||
+        legacyRoundingDirection;
+    const endRoundingDirection =
+        localStorage.getItem('endRoundingDirection') ||
+        localStorage.getItem('roundingDirection') ||
+        'down';
+    const roundingMinutes = Number(
+        localStorage.getItem('roundingMinutes') || '1'
+    );
+    const roundedStart = roundDateTime(
+        start,
+        roundingMinutes,
+        startRoundingDirection
+    );
+    const roundedEnd = roundDateTime(
+        end,
+        roundingMinutes,
+        endRoundingDirection
+    );
+
+    if (roundedEnd <= roundedStart) {
+        alert('丸めた後の終了日時は開始日時より後になるようにしてください。');
+        return;
+    }
+
+    const roundedStartDateTime = formatLocalDateTime(roundedStart);
+    const roundedEndDateTime = formatLocalDateTime(roundedEnd);
+    document.getElementById('start-datetime').value = roundedStartDateTime;
+    document.getElementById('end-datetime').value = roundedEndDateTime;
+
+    const workTimeMs = roundedEnd - roundedStart;
     const breakTimeMs = breakMinutes * 60 * 1000;
     const actualWorkMs = workTimeMs - breakTimeMs;
 
@@ -168,16 +256,16 @@ function saveRecord() {
     const minutes = totalMinutes % 60;
     const workDuration = `${hours}時間 ${minutes}分`;
 
-    const dateStr = startDateTimeStr.slice(0, 10);
-    const startTimeStr = startDateTimeStr.slice(11, 16);
-    const endTimeStr = endDateTimeStr.slice(11, 16);
+    const dateStr = roundedStartDateTime.slice(0, 10);
+    const startTimeStr = roundedStartDateTime.slice(11, 16);
+    const endTimeStr = roundedEndDateTime.slice(11, 16);
 
     const newRecord = {
         date: dateStr,
         startTime: startTimeStr,
         endTime: endTimeStr,
-        startDateTime: startDateTimeStr,
-        endDateTime: endDateTimeStr,
+        startDateTime: roundedStartDateTime,
+        endDateTime: roundedEndDateTime,
         breakMinutes,
         options: [...document.querySelectorAll(
             'input[name="record-option"]:checked'
@@ -397,4 +485,3 @@ document.getElementById('delete-month-button').addEventListener('click', () => {
     document.getElementById('settings-message').textContent =
         `${displayMonth}の記録を削除しました。`;
 });
-
